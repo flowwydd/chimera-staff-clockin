@@ -3,8 +3,14 @@ local afkTimeout = Config.AFKClockoutTime * 60
 local playerLastActivity = {}
 
 RegisterCommand("clockin", function(source, args, rawCommand)
+    if playerClockIns[source] then
+        SendNotification(source, "You are already clocked in.", 'error')
+        return
+    end
+
     playerClockIns[source] = {time = os.time(), dept = dept}
     playerLastActivity[source] = os.time()
+
     if IsPlayerAceAllowed(source, Config.AcePerm) then
         SendNotification(source, "You have clocked in.", 'success')
         local discordId
@@ -13,21 +19,24 @@ RegisterCommand("clockin", function(source, args, rawCommand)
                 discordId = string.gsub(identifier, "discord:", "")
             end
         end
+
         local data = {
             staff = true,
         }
         TriggerClientEvent('chimera-staff', source, data)
         if discordId then
             local webhookURL = Config.Webhook
-            local embedData = {
-                ["color"] = 5763719,
-                ["title"] = "Clockin",
-                ["description"] = "\n**Discord**: <@" .. discordId .. ">",
-                ["footer"] = {
-                    ["text"] = "Chimera Labs",
-                },
-            }
-            sendHttpRequest(webhookURL, {username = "Staff API", embeds = {embedData}})
+            if webhookURL and webhookURL ~= "" then
+                local embedData = {
+                    ["color"] = 5763719,
+                    ["title"] = "Clockin",
+                    ["description"] = "\n**Discord**: <@" .. discordId .. ">",
+                    ["footer"] = {
+                        ["text"] = "Chimera Labs",
+                    },
+                }
+                sendHttpRequest(webhookURL, {username = "Staff API", embeds = {embedData}})
+            end
         end
     else
         SendNotification(source, "No Permission", 'error')
@@ -62,29 +71,40 @@ function clockOutPlayer(source, reason)
     TriggerClientEvent('chimera-staff', source, data)
     if discordId then
         local webhookURL = Config.Webhook
-        local embedData = {
-            ["color"] = 15548997,
-            ["title"] = "Clockout",
-            ["description"] = "\n**Discord**: <@" .. discordId .. ">\n**Reason**: " .. reason .. "\n**Clocked In At**: " .. formatTime(clockInTime) .. "\n**Clocked Out At**: " .. formatTime(currentTime),
-            ["footer"] = {
-                ["text"] = "Chimera Labs",
-            },
-        }
-        sendHttpRequest(webhookURL, {username = "Clockin Bot", embeds = {embedData}})
+        if webhookURL and webhookURL ~= "" then
+            local embedData = {
+                ["color"] = 15548997,
+                ["title"] = "Clockout",
+                ["description"] = "\n**Discord**: <@" .. discordId .. ">\n**Reason**: " .. reason .. "\n**Clocked In At**: " .. formatTime(clockInTime) .. "\n**Clocked Out At**: " .. formatTime(currentTime),
+                ["footer"] = {
+                    ["text"] = "Chimera Labs",
+                },
+            }
+            sendHttpRequest(webhookURL, {username = "Clockin Bot", embeds = {embedData}})
+        end
     end
 end
 
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(60000)
+        Citizen.Wait(1000) 
         local currentTime = os.time()
         for source, lastActivity in pairs(playerLastActivity) do
-            if playerClockIns[source] and (currentTime - lastActivity >= afkTimeout) then
-                TriggerClientEvent("showAFKDialog", source)
-                clockOutPlayer(source, "AFK Clockout")
+            if playerClockIns[source] then
+                TriggerClientEvent("checkPlayerMovement", source) 
+                if (currentTime - lastActivity >= afkTimeout) then
+                    TriggerClientEvent("showAFKDialog", source)
+                	clockOutPlayer(source, "AFK Clockout")
+                end
             end
         end
     end
+end)
+
+RegisterNetEvent("playerMoved")
+AddEventHandler("playerMoved", function()
+    local source = source
+    playerLastActivity[source] = os.time()
 end)
 
 RegisterNetEvent("playerActivity")
