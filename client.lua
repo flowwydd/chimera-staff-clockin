@@ -18,3 +18,17 @@ AddEventHandler("showAFKDialog", function()
         cancel = false
     })
 end)
+
+local lastPosition = nil
+
+RegisterNetEvent("checkPlayerMovement")
+AddEventHandler("checkPlayerMovement", function()
+    local ped = PlayerPedId()
+    local currentPosition = GetEntityCoords(ped)
+    
+    if lastPosition and #(currentPosition - lastPosition) > 0.1 then
+        TriggerServerEvent("playerMoved")
+    end
+    
+    lastPosition = currentPosition
+end)
