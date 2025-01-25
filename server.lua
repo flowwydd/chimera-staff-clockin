@@ -47,7 +47,7 @@ function clockOutPlayer(source, reason)
     end
     local clockInTime = clockData.time
     local totalTimeWorked = currentTime - clockInTime
-    SendNotification(source, "You have clocked out.", 'success')
+    SendNotification(source, "You have clocked out.", 'error')
     playerClockIns[source] = nil
     playerLastActivity[source] = nil
     local discordId
