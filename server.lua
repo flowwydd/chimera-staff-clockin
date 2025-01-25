@@ -27,10 +27,10 @@ RegisterCommand("clockin", function(source, args, rawCommand)
                     ["text"] = "Chimera Labs",
                 },
             }
-            sendHttpRequest(webhookURL, {username = "Clockin Bot", embeds = {embedData}})
+            sendHttpRequest(webhookURL, {username = "Staff API", embeds = {embedData}})
         end
     else
-        TriggerClientEvent('codem-notification', source, 'No Permission', 8000, 'error')
+        SendNotification(source, "No Permission", 'error')
     end
 end)
 
