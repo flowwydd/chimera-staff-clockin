@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 games { 'gta5' }
 
-author 'Flow & Danboi (ChimeraLabs)'
+author 'Danboi - Edited By Chimera Development'
 description 'Staff Clockin/Clockout'
 version '1.0.0'
 lua54 'yes'
