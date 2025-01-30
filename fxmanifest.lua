@@ -8,16 +8,16 @@ lua54 'yes'
 
 dependency 'ox_lib'
 
-shared_script 'config.lua'
-
-client_scripts {
+shared_scripts {
+  "config.lua",
   "@ox_lib/init.lua",
-  "client.lua",
   "functions.lua"
 }
 
+client_scripts {
+	'client.lua'
+}
+
 server_scripts {
-  "@ox_lib/init.lua",
-  "server.lua",
-  "functions.lua"
+	'server.lua'
 }
