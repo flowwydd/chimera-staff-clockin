@@ -1,13 +1,14 @@
 local afkTimeout = Config.AFKClockoutTime * 60
+local lastPosition = nil
+
+TriggerEvent('chat:addSuggestion', '/clockin', 'Clock in as a staff member', {})
+TriggerEvent('chat:addSuggestion', '/clockout', 'Clock out as a staff member', {})
 
 RegisterNetEvent("receiveAFKTimeout")
 AddEventHandler("receiveAFKTimeout", function(timeout)
     afkTimeout = timeout * 60 
     print("AFK Timeout set to: " .. (afkTimeout / 60) .. " minutes") 
 end)
-
-TriggerEvent('chat:addSuggestion', '/clockin', 'Clock in as a staff member', {})
-TriggerEvent('chat:addSuggestion', '/clockout', 'Clock out as a staff member', {})
 
 RegisterNetEvent("showAFKDialog")
 AddEventHandler("showAFKDialog", function()
@@ -19,8 +20,6 @@ AddEventHandler("showAFKDialog", function()
     })
 end)
 
-local lastPosition = nil
-
 RegisterNetEvent("checkPlayerMovement")
 AddEventHandler("checkPlayerMovement", function()
     local ped = PlayerPedId()
@@ -29,6 +28,5 @@ AddEventHandler("checkPlayerMovement", function()
     if lastPosition and #(currentPosition - lastPosition) > 0.1 then
         TriggerServerEvent("playerMoved")
     end
-    
     lastPosition = currentPosition
 end)
