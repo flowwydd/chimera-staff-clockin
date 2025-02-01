@@ -3,6 +3,11 @@ local playerLastActivity = {}
 local clockOutTimestamps = {}
 local afkTimeout = Config.AFKClockoutTime * 60
 local cooldownTime = 30
+local resourceName = GetCurrentResourceName()
+if resourceName ~= "chimera-staff-clockin" then
+    print("^1[ERROR] Resource name must be 'chimera-staff-clockin'. Please rename the resource correctly.^0")
+    return
+end
 
 RegisterCommand("clockin", function(source, args, rawCommand)
     local currentTime = os.time()
