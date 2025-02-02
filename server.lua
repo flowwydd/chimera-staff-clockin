@@ -3,6 +3,11 @@ local playerLastActivity = {}
 local clockOutTimestamps = {}
 local afkTimeout = Config.AFKClockoutTime * 60
 local cooldownTime = 30
+local resourceName = GetCurrentResourceName()
+if resourceName ~= "chimera-staff-clockin" then
+    print("^1[ERROR] Resource name must be 'chimera-staff-clockin'. Please rename the resource correctly.^0")
+    return
+end
 
 RegisterCommand("clockin", function(source, args, rawCommand)
     local currentTime = os.time()
@@ -24,11 +29,10 @@ RegisterCommand("clockout", function(source, args, rawCommand)
 end, false)
 
 function clockInPlayer(source, reason)
-    playerClockIns[source] = {time = os.time(), dept = "chimera-staff"}
+    playerClockIns[source] = {time = os.time()}
     playerLastActivity[source] = os.time()
 
-    local data = {staff = true}
-    TriggerClientEvent('chimera-staff', source, data)
+    Player(source).state['chimera-staff:clockedin'] = true
 
     local discordId
     for _, identifier in ipairs(GetPlayerIdentifiers(source)) do
@@ -77,8 +81,7 @@ function clockOutPlayer(source, reason)
         end
     end
 
-    local data = {staff = false}
-    TriggerClientEvent('chimera-staff', source, data)
+    Player(source).state['chimera-staff:clockedin'] = nil
 
     if discordId then
         local webhookURL = Config.Webhook
@@ -96,14 +99,14 @@ end
 
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(1000)
+        Citizen.Wait(10000)
         local currentTime = os.time()
         for source, lastActivity in pairs(playerLastActivity) do
             if playerClockIns[source] then
                 if not IsPlayerAceAllowed(source, "clockin.bypass") then
                     TriggerClientEvent("checkPlayerMovement", source)
                     if (currentTime - lastActivity >= afkTimeout) then
-                        TriggerClientEvent("showAFKDialog", source)
+                        TriggerClientEvent("showAFKDialog", source, afkTimeout)
                         clockOutPlayer(source, "AFK Clockout")
                     end
                 end
@@ -118,16 +121,11 @@ AddEventHandler("playerMoved", function()
     playerLastActivity[source] = os.time()
 end)
 
-RegisterNetEvent("playerActivity")
-AddEventHandler("playerActivity", function()
-    local source = source
-    playerLastActivity[source] = os.time()
-end)
-
 AddEventHandler("playerDropped", function(reason)
     local source = source
     if playerClockIns[source] then
         clockOutPlayer(source, "Player Disconnected: " .. reason)
+        Player(source).state['chimera-staff:clockedin'] = nil
     end
 end)
 

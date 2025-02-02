@@ -1,17 +1,9 @@
-local afkTimeout = Config.AFKClockoutTime * 60
 local lastPosition = nil
-
 TriggerEvent('chat:addSuggestion', '/clockin', 'Clock in as a staff member', {})
 TriggerEvent('chat:addSuggestion', '/clockout', 'Clock out as a staff member', {})
 
-RegisterNetEvent("receiveAFKTimeout")
-AddEventHandler("receiveAFKTimeout", function(timeout)
-    afkTimeout = timeout * 60 
-    print("AFK Timeout set to: " .. (afkTimeout / 60) .. " minutes") 
-end)
-
 RegisterNetEvent("showAFKDialog")
-AddEventHandler("showAFKDialog", function()
+AddEventHandler("showAFKDialog", function(afkTimeout)
     local alert = lib.alertDialog({
         header = 'Staff API',
         content = 'You have been clocked in and inactive for more than ' .. (afkTimeout / 60) .. ' minutes. You have been clocked out.',
