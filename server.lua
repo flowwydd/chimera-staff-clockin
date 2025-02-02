@@ -129,10 +129,6 @@ AddEventHandler("playerDropped", function(reason)
     end
 end)
 
-function formatTime(seconds)
-    return "<t:" .. seconds .. ">"
-end
-
 exports("StaffClockin", function(source, reason)
     clockInPlayer(source, reason or "Manual Clock-in")
 end)
